@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>block2</title>
+<script type="text/javascript" src="http://www.xingongyi.org/Public/Home/js/jquery-1.9.0.min.js"></script>
+<link rel="stylesheet" href="http://www.xingongyi.org/Public/Css/zjf.css" />
+</head>
+<body>
+<div id="box" style="width:100px;height:100px;background:#ccc;cursor:pointer;position:absolute;"></div>
+<script>
+var isd=false,box,xx,yy,isopen=false,x,y;
+var ws=new WebSocket("ws://192.168.2.133:888");
+ws.onmessage=function(e){
+	var msg=e.data;
+	var msgarr=msg.split("##");
+	if(msgarr.length==2&&!isd){
+		box.css({left:msgarr[0]+"px",top:msgarr[1]+"px"});
+	}
+	console.log(e.data);
+}
+ws.onerror=function(e){alert("connection error");}
+ws.onclose=function(){isopen=false;}
+ws.onopen=function(){isopen=true;}
+$(function(){
+	box=$("#box");
+	box.mousedown(function(event){
+		isd=true;
+		event.preventDefault();
+		xx=event.clientX-$(this).position().left+$(document).scrollLeft();
+		yy=event.clientY-$(this).position().top+$(document).scrollTop();
+	}).mouseup(function(){
+		isd=false;
+	});
+	$(document).mousemove(function(e){
+		if(isd){
+			x=e.clientX-xx;
+			y=e.clientY-yy;
+			box.css({left:x+"px",top:y+"px"}).html();
+			if(isopen)ws.send(x+"##"+y);
+		}
+	});
+});
+</script>
+</body>
+</html>
